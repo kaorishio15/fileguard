@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FileGuard — Static Threat & Risk Inspection Engine</title>
+    <!-- tailwind css CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                        display: ['Space Grotesk', 'Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- google fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body class="h-full font-sans text-slate-800 antialiased selection:bg-cyan-500 selection:text-white flex flex-col justify-between relative overflow-x-hidden">
+
+    <!-- ambient background glow -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl h-80 bg-cyan-500/[0.06] blur-[120px] pointer-events-none rounded-full"></div>
+
+    <!-- top navigation header -->
+    <header class="border-b border-slate-200 bg-white/70 backdrop-blur-xl sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-baseline space-x-3">
+                <h1 class="font-display font-bold text-slate-900 tracking-wide text-lg">FileGuard</h1>
+                <p class="text-xs text-slate-500">Static Threat & Risk Inspection Engine</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-600 border border-emerald-200 shadow-sm shadow-emerald-500/5">
+                    <span class="w-1.5 h-1.5 mr-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                    Engine Online
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- main content container -->
+    <main class="max-w-3xl w-full mx-auto px-6 py-12 flex-grow flex flex-col justify-center relative z-10">
+
+        <!-- hero intro -->
+        <div class="text-center mb-10">
+            <h2 class="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 mb-3">Inspect files safely without execution</h2>
+            <p class="text-slate-600 text-sm md:text-base max-w-xl mx-auto leading-relaxed">Upload any untrusted file to analyze cryptographic fingerprints, hidden data structures, and potential security risks instantly.</p>
+        </div>
+
+        <!-- upload card -->
+        <div id="upload-card" class="bg-white/80 backdrop-blur-xl border border-slate-200/80 rounded-2xl p-8 shadow-xl transition-all duration-300">
+            <form id="upload-form" class="relative">
+                <div id="drop-zone" class="border border-dashed border-slate-300 hover:border-cyan-500/50 rounded-xl p-10 text-center cursor-pointer transition-all duration-200 bg-slate-50/50 hover:bg-slate-50 group">
+                    <input type="file" id="file-input" name="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                    <div class="flex flex-col items-center pointer-events-none">
+                        <div class="h-14 w-14 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-500 mb-4 group-hover:scale-105 group-hover:border-cyan-500/30 group-hover:text-cyan-600 transition-all duration-200 shadow-inner">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                        </div>
+                        <p class="text-sm font-medium text-slate-800 mb-1">
+                            <span class="text-cyan-600 font-semibold">Click to upload</span> or drag and drop
+                        </p>
+                        <p class="text-xs text-slate-500">Executables, archives, documents, or scripts</p>
+                    </div>
+                </div>
+
+                <!-- selected file display -->
+                <div id="file-selected-info" class="hidden mt-4 flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                    <div class="flex items-center space-x-3 overflow-hidden">
+                        <div class="h-10 w-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-cyan-600 shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        </div>
+                        <div class="truncate">
+                            <p id="file-name-display" class="text-sm font-medium text-slate-800 truncate"></p>
+                            <p id="file-size-display" class="text-xs text-slate-500"></p>
+                        </div>
+                    </div>
+                    <button type="submit" id="submit-btn" class="ml-4 px-5 py-2.5 bg-cyan-600 hover:bg-cyan-500 active:scale-95 text-white font-semibold text-sm rounded-xl transition-all shadow-lg shadow-cyan-600/20 shrink-0">
+                        Scan File
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- loading state card -->
+        <div id="loading-card" class="hidden bg-white/80 backdrop-blur-xl border border-slate-200/80 rounded-2xl p-12 text-center shadow-xl">
+            <div class="inline-block relative w-12 h-12 mb-4">
+                <div class="absolute inset-0 rounded-full border-2 border-slate-200"></div>
+                <div class="absolute inset-0 rounded-full border-2 border-cyan-600 border-t-transparent animate-spin"></div>
+            </div>
+            <h3 class="text-base font-semibold text-slate-800 mb-1">Analyzing File Structure...</h3>
+            <p class="text-xs text-slate-500">Inspecting fingerprints, data randomness, and safety markers</p>
+        </div>
+
+        <!-- error state card -->
+        <div id="error-card" class="hidden bg-rose-50 backdrop-blur-xl border border-rose-200 rounded-2xl p-6 text-center shadow-lg">
+            <div class="flex items-center justify-center space-x-2 text-rose-600 mb-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                <span class="font-semibold text-sm">Scan Error</span>
+            </div>
+            <p id="error-message" class="text-xs text-rose-600/80 mb-4"></p>
+            <button onclick="resetScanner()" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-medium rounded-lg transition-all shadow-md shadow-cyan-600/20">
+                Try Another File
+            </button>
+        </div>
+
+        <!-- results dashboard -->
+        <div id="results-card" class="hidden space-y-6">
+            
+            <!-- summary banner -->
+            <div class="bg-white/80 backdrop-blur-xl border border-slate-200/80 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div class="flex items-center space-x-4">
+                    <div id="severity-icon" class="h-14 w-14 rounded-2xl flex items-center justify-center text-xl shrink-0 border shadow-inner">
+                        🛡️
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2 mb-1">
+                            <span id="severity-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide uppercase border"></span>
+                            <span class="text-xs text-slate-500 truncate max-w-[200px]" id="result-filename">filename.ext</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900" id="risk-headline">Risk Assessment Complete</h3>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 pt-4 md:pt-0 border-slate-200">
+                    <div class="text-left md:text-right">
+                        <p class="text-xs text-slate-500 mb-0.5">Risk Score</p>
+                        <p class="text-2xl font-bold font-mono tracking-tight text-slate-900" id="risk-score-display">0<span class="text-sm text-slate-400 font-normal">/100</span></p>
+                    </div>
+                    <button onclick="resetScanner()" class="px-5 py-2.5 bg-cyan-600 hover:bg-cyan-500 active:scale-95 text-white text-xs font-semibold rounded-xl transition-all shadow-lg shadow-cyan-600/20 flex items-center space-x-1.5 shrink-0">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        <span>Scan Another</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- score meaning explainer box -->
+            <div id="score-explainer-box" class="p-4 rounded-xl border text-xs leading-relaxed transition-all">
+                <p id="score-explainer-text" class="font-medium"></p>
+            </div>
+
+            <!-- technical metadata grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- sha-256 hash card -->
+                <div class="bg-white/60 backdrop-blur-xl border border-slate-200/80 rounded-xl p-4 shadow-lg flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <div class="group relative inline-block cursor-help">
+                                <p class="text-xs text-slate-700 font-semibold underline decoration-dotted decoration-slate-400 underline-offset-4">Digital Fingerprint (SHA-256)</p>
+                                <div class="absolute bottom-full left-0 mb-2 hidden group-hover:block w-64 p-3 bg-slate-900 text-slate-100 text-[11px] rounded-xl shadow-xl z-20 pointer-events-none leading-relaxed">
+                                    Think of this like a unique DNA barcode for the file. If even a single comma changes inside the file, this entire code changes completely. It lets security teams look up files instantly without sharing actual file contents.
+                                </div>
+                            </div>
+                            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <p id="meta-sha256" class="text-xs font-mono text-slate-700 break-all bg-slate-50 p-2.5 rounded-lg border border-slate-200/60 mb-2"></p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4">
+                    <!-- shannon entropy card -->
+                    <div class="bg-white/60 backdrop-blur-xl border border-slate-200/80 rounded-xl p-4 shadow-lg flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <div class="group relative inline-block cursor-help">
+                                    <p class="text-xs text-slate-700 font-semibold underline decoration-dotted decoration-slate-400 underline-offset-4">Data Randomness (Shannon Entropy)</p>
+                                    <div class="absolute bottom-full left-0 mb-2 hidden group-hover:block w-64 p-3 bg-slate-900 text-slate-100 text-[11px] rounded-xl shadow-xl z-20 pointer-events-none leading-relaxed">
+                                        Measures how chaotic or scrambled the file's inner contents are. Normal documents have predictable patterns, whereas hidden, packed, or encrypted malware usually looks completely random (high chaos).
+                                    </div>
+                                </div>
+                                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <p id="meta-entropy" class="text-sm font-mono font-semibold text-slate-800 mt-1"></p>
+                        </div>
+                    </div>
+
+                    <!-- detected mime type card -->
+                    <div class="bg-white/60 backdrop-blur-xl border border-slate-200/80 rounded-xl p-4 shadow-lg flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <div class="group relative inline-block cursor-help">
+                                    <p class="text-xs text-slate-700 font-semibold underline decoration-dotted decoration-slate-400 underline-offset-4">True File Type (Detected MIME Type)</p>
+                                    <div class="absolute bottom-full left-0 mb-2 hidden group-hover:block w-64 p-3 bg-slate-900 text-slate-100 text-[11px] rounded-xl shadow-xl z-20 pointer-events-none leading-relaxed">
+                                        Hackers sometimes disguise dangerous programs by renaming a file from .exe to .jpg. This check reads the actual underlying code to reveal what kind of file it truly is.
+                                    </div>
+                                </div>
+                                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <p id="meta-mime" class="text-xs font-mono font-semibold text-slate-800 truncate mt-1" title=""></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- evidence & heuristics list -->
+            <div class="bg-white/80 backdrop-blur-xl border border-slate-200/80 rounded-2xl p-6 shadow-xl">
+                <div class="mb-4">
+                    <div class="flex items-center justify-between mb-1">
+                        <div class="group relative inline-block cursor-help">
+                            <h4 class="text-sm font-semibold text-slate-900 flex items-center space-x-2 underline decoration-dotted decoration-slate-400 underline-offset-4">
+                                <span>Identified Indicators & Security Evidence</span>
+                            </h4>
+                            <div class="absolute bottom-full left-0 mb-2 hidden group-hover:block w-72 p-3 bg-slate-900 text-slate-100 text-[11px] rounded-xl shadow-xl z-20 pointer-events-none leading-relaxed">
+                                Specific warning clues or suspicious behaviors discovered inside the file during inspection (such as hidden scripts, suspicious instructions, or known security triggers).
+                            </div>
+                        </div>
+                        <span id="evidence-count" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium border border-slate-200">0 indicators</span>
+                    </div>
+                </div>
+                <div id="evidence-list" class="space-y-2.5 mt-4">
+                    <!-- dynamic evidence items injected here -->
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- footer -->
+    <footer class="border-t border-cyan-200 bg-cyan-50 py-6 text-center text-xs text-cyan-800 relative z-10">
+        <p>FileGuard &bull; Stateless Static Security & Heuristic Analysis Engine</p>
+    </footer>
+
+    <!-- client-side script -->
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const dropZone = document.getElementById('drop-zone');
+        const fileSelectedInfo = document.getElementById('file-selected-info');
+        const fileNameDisplay = document.getElementById('file-name-display');
+        const fileSizeDisplay = document.getElementById('file-size-display');
+        const uploadCard = document.getElementById('upload-card');
+        const loadingCard = document.getElementById('loading-card');
+        const errorCard = document.getElementById('error-card');
+        const errorMessage = document.getElementById('error-message');
+        const resultsCard = document.getElementById('results-card');
+        const uploadForm = document.getElementById('upload-form');
+
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                fileNameDisplay.textContent = file.name;
+                fileSizeDisplay.textContent = formatBytes(file.size);
+                
+                dropZone.classList.add('hidden');
+                fileSelectedInfo.classList.remove('hidden');
+            }
+        });
+
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!fileInput.files.length) return;
+
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            uploadCard.classList.add('hidden');
+            errorCard.classList.add('hidden');
+            resultsCard.classList.add('hidden');
+            loadingCard.classList.remove('hidden');
+
+            try {
+                const response = await fetch('/api/scan', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                console.log("Scan Response Data:", data);
+
+                if (!response.ok) {
+                    throw new Error(data.error || data.message || 'Failed to analyze file.');
+                }
+
+                renderResults(data, file);
+            } catch (err) {
+                loadingCard.classList.add('hidden');
+                errorMessage.textContent = err.message || 'An unexpected error occurred during inspection.';
+                errorCard.classList.remove('hidden');
+            }
+        });
+
+        function renderResults(data, file) {
+            loadingCard.classList.add('hidden');
+
+            const score = data.risk_score ?? data.score ?? data.riskScore ?? data.threat_score ?? data.threatScore ?? 0;
+            const sha256 = data.sha256 ?? data.file_hash ?? data.hash ?? 'N/A';
+            const entropy = data.entropy ?? data.shannon_entropy ?? 'N/A';
+            const mimeType = data.mime_type ?? data.detected_type ?? data.file_type ?? 'Unknown';
+            const evidence = data.evidence ?? data.indicators ?? data.findings ?? [];
+            let severity = data.severity ?? data.risk_level ?? (score > 70 ? 'HIGH' : score > 30 ? 'MEDIUM' : 'SAFE');
+            severity = severity.toUpperCase();
+
+            document.getElementById('result-filename').textContent = file.name;
+            document.getElementById('meta-sha256').textContent = sha256;
+            document.getElementById('meta-entropy').textContent = entropy;
+            
+            const mimeElem = document.getElementById('meta-mime');
+            mimeElem.textContent = mimeType;
+            mimeElem.title = mimeType;
+
+            document.getElementById('risk-score-display').innerHTML = `${score}<span class="text-sm text-slate-400 font-normal">/100</span>`;
+
+            // dynamic score explainer message based on score ranges
+            const explainerBox = document.getElementById('score-explainer-box');
+            const explainerText = document.getElementById('score-explainer-text');
+
+            if (score <= 15) {
+                explainerBox.className = 'p-4 rounded-xl border bg-emerald-50 border-emerald-200 text-emerald-800';
+                explainerText.innerHTML = `A score of <span class="font-mono font-bold">${score}/100</span> is considered <strong class="text-emerald-700">very safe</strong>. A good, normal file typically scores between 0 and 20. No harmful indicators were found here.`;
+            } else if (score <= 50) {
+                explainerBox.className = 'p-4 rounded-xl border bg-amber-50 border-amber-200 text-amber-800';
+                explainerText.innerHTML = `A score of <span class="font-mono font-bold">${score}/100</span> is <strong class="text-amber-700">moderate</strong>. While a good score is ideally under 20, scores in this range suggest minor anomalies or unusual formatting that are worth double-checking before opening.`;
+            } else {
+                explainerBox.className = 'p-4 rounded-xl border bg-rose-50 border-rose-200 text-rose-800';
+                explainerText.innerHTML = `A score of <span class="font-mono font-bold">${score}/100</span> is <strong class="text-rose-700">high risk</strong>. A healthy file should score close to 0. This high score indicates strong warning signs or potentially malicious code structure—exercise extreme caution.`;
+            }
+
+            // severity styling & badge update
+            const badge = document.getElementById('severity-badge');
+            const icon = document.getElementById('severity-icon');
+
+            badge.textContent = severity;
+
+            if (severity === 'HIGH' || severity === 'CRITICAL' || score >= 70) {
+                badge.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-rose-100 text-rose-700 border border-rose-200';
+                icon.className = 'h-14 w-14 rounded-2xl flex items-center justify-center text-xl shrink-0 bg-rose-50 border border-rose-200 text-rose-600 shadow-sm';
+                icon.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>`;
+                document.getElementById('risk-headline').textContent = 'High Threat Indicators Detected';
+            } else if (severity === 'MEDIUM' || (score >= 30 && score < 70)) {
+                badge.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-amber-100 text-amber-700 border border-amber-200';
+                icon.className = 'h-14 w-14 rounded-2xl flex items-center justify-center text-xl shrink-0 bg-amber-50 border border-amber-200 text-amber-600 shadow-sm';
+                icon.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+                document.getElementById('risk-headline').textContent = 'Suspicious Anomalies Found';
+            } else {
+                badge.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-emerald-100 text-emerald-700 border border-emerald-200';
+                icon.className = 'h-14 w-14 rounded-2xl flex items-center justify-center text-xl shrink-0 bg-emerald-50 border border-emerald-200 text-emerald-600 shadow-sm';
+                icon.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+                document.getElementById('risk-headline').textContent = 'No Critical Threats Detected';
+            }
+
+            // evidence items
+            const evidenceList = document.getElementById('evidence-list');
+            evidenceList.innerHTML = '';
+            
+            document.getElementById('evidence-count').textContent = `${evidence.length} indicator${evidence.length === 1 ? '' : 's'}`;
+
+            if (evidence.length === 0) {
+                evidenceList.innerHTML = `
+                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center text-slate-500 text-xs">
+                        No heuristic warning flags triggered for this file. Clean bill of health!
+                    </div>
+                `;
+            } else {
+                evidence.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-start space-x-3 text-xs text-slate-700';
+                    div.innerHTML = `
+                        <span class="text-cyan-600 mt-0.5 shrink-0 font-bold">▪</span>
+                        <span class="leading-relaxed">${typeof item === 'string' ? item : (item.description || JSON.stringify(item))}</span>
+                    `;
+                    evidenceList.appendChild(div);
+                });
+            }
+
+            resultsCard.classList.remove('hidden');
+        }
+
+        function resetScanner() {
+            fileInput.value = '';
+            dropZone.classList.remove('hidden');
+            fileSelectedInfo.classList.add('hidden');
+            resultsCard.classList.add('hidden');
+            errorCard.classList.add('hidden');
+            loadingCard.classList.add('hidden');
+            uploadCard.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
